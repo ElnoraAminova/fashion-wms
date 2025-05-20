@@ -1,0 +1,53 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Mahsulotni o'chirish - Fashion CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Mahsulotni o'chirish</h1>
+    <a href="{% url 'product-detail' product.id %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tasdiqlash</h6>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p>Siz haqiqatan ham <strong>{{ product.name }}</strong> mahsulotini o'chirmoqchimisiz?</p>
+            <p>Bu amal qaytarib bo'lmaydi!</p>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-4">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <h5>{{ product.name }}</h5>
+                <p><strong>Kategoriya:</strong> {{ product.category.name }}</p>
+                <p><strong>Narxi:</strong> {{ product.price }} so'm</p>
+                <p><strong>Soni:</strong> {{ product.stock }}</p>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Ha, o'chirish
+            </button>
+            <a href="{% url 'product-detail' product.id %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Yo'q, bekor qilish
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

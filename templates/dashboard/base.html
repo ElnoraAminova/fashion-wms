@@ -1,0 +1,204 @@
+{% load static %}
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fashion CRM{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-tshirt me-2"></i>Fashion CRM</h3>
+                <div class="sidebar-toggle d-md-none">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="{% if request.path == '/' %}active{% endif %}">
+                    <a href="{% url 'dashboard' %}">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
+                <li class="{% if 'products' in request.path %}active{% endif %}">
+                    <a href="#productSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-box"></i> Mahsulotlar
+                    </a>
+                    <ul class="collapse list-unstyled {% if 'products' in request.path %}show{% endif %}" id="productSubmenu">
+                        <li>
+                            <a href="{% url 'product-list' %}"><i class="fas fa-list"></i> Barcha mahsulotlar</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'product-create' %}"><i class="fas fa-plus"></i> Yangi mahsulot</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'category-list' %}"><i class="fas fa-tags"></i> Kategoriyalar</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="{% if 'customers' in request.path %}active{% endif %}">
+                    <a href="#customerSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-users"></i> Mijozlar
+                    </a>
+                    <ul class="collapse list-unstyled {% if 'customers' in request.path %}show{% endif %}" id="customerSubmenu">
+                        <li>
+                            <a href="{% url 'customer-list' %}"><i class="fas fa-list"></i> Barcha mijozlar</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'customer-create' %}"><i class="fas fa-user-plus"></i> Yangi mijoz</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="{% if 'orders' in request.path %}active{% endif %}">
+                    <a href="#orderSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-shopping-cart"></i> Buyurtmalar
+                    </a>
+                    <ul class="collapse list-unstyled {% if 'orders' in request.path %}show{% endif %}" id="orderSubmenu">
+                        <li>
+                            <a href="{% url 'order-list' %}"><i class="fas fa-list"></i> Barcha buyurtmalar</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'order-create' %}"><i class="fas fa-plus"></i> Yangi buyurtma</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="list-unstyled sidebar-footer">
+                <li>
+                    <a href="{% url 'profile' %}">
+                        <i class="fas fa-user-circle"></i> Profil
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Chiqish
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Navbar -->
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-primary d-md-none">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <div class="ms-auto d-flex align-items-center">
+                        <div class="dropdown">
+                            <a class="user-profile dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="{{ request.user.profile.image.url }}" alt="{{ request.user.username }}">
+                                <span class="ms-2 d-none d-lg-inline">{{ request.user.get_full_name|default:request.user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user-circle"></i> Profil</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Chiqish</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Messages -->
+            {% if messages %}
+                <div class="container-fluid mt-3">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Main Content -->
+            <main>
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <span class="text-muted">© {% now "Y" %} Fashion CRM. Barcha huquqlar himoyalangan.</span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarCollapse = document.getElementById('sidebarCollapse');
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+
+            if (sidebarCollapse) {
+                sidebarCollapse.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    content.classList.toggle('active');
+                });
+            }
+
+            // Close sidebar on mobile when clicking outside
+            document.addEventListener('click', function(event) {
+                const isClickInsideSidebar = sidebar.contains(event.target);
+                const isClickOnToggle = sidebarCollapse && sidebarCollapse.contains(event.target);
+
+                if (!isClickInsideSidebar && !isClickOnToggle && window.innerWidth < 992 && !sidebar.classList.contains('active')) {
+                    sidebar.classList.add('active');
+                    content.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

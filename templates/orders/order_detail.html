@@ -1,0 +1,134 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Buyurtma #{{ order.id }} - Fashion CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Buyurtma tafsilotlari</h1>
+    <div>
+        <a href="{% url 'order-list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Orqaga
+        </a>
+        <a href="{% url 'order-update' order.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Tahrirlash
+        </a>
+        <a href="{% url 'order-delete' order.id %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> O'chirish
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buyurtma ma'lumotlari</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Buyurtma ID:</div>
+                    <div class="col-md-8">#{{ order.id }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Mijoz:</div>
+                    <div class="col-md-8">
+                        <a href="{% url 'customer-detail' order.customer.id %}">
+                            {{ order.customer.get_full_name }}
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Telefon:</div>
+                    <div class="col-md-8">{{ order.customer.phone }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Manzil:</div>
+                    <div class="col-md-8">{{ order.customer.address }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Sana:</div>
+                    <div class="col-md-8">{{ order.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Holati:</div>
+                    <div class="col-md-8">
+                        {% if order.status == 'new' %}
+                        <span class="badge bg-warning">Yangi</span>
+                        {% elif order.status == 'paid' %}
+                        <span class="badge bg-success">To'langan</span>
+                        {% elif order.status == 'delivered' %}
+                        <span class="badge bg-primary">Yetkazilgan</span>
+                        {% else %}
+                        <span class="badge bg-danger">Bekor qilingan</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Yaratuvchi:</div>
+                    <div class="col-md-8">{{ order.created_by.get_full_name|default:order.created_by.username }}</div>
+                </div>
+                
+                {% if order.note %}
+                <div class="row mb-3">
+                    <div class="col-md-4 font-weight-bold">Izoh:</div>
+                    <div class="col-md-8">{{ order.note }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Buyurtma elementlari</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Mahsulot</th>
+                                <th>Narxi</th>
+                                <th>Miqdori</th>
+                                <th>Jami</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'product-detail' item.product.id %}">
+                                        {{ item.product.name }}
+                                    </a>
+                                </td>
+                                <td>{{ item.price }} so'm</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.get_cost }} so'm</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">Buyurtmada mahsulotlar yo'q</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-right">Umumiy narx:</th>
+                                <th>{{ total }} so'm</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

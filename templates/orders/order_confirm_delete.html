@@ -1,0 +1,53 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Buyurtmani o'chirish - Fashion CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Buyurtmani o'chirish</h1>
+    <a href="{% url 'order-detail' order.id %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tasdiqlash</h6>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p>Siz haqiqatan ham <strong>Buyurtma #{{ order.id }}</strong> ni o'chirmoqchimisiz?</p>
+            <p>Bu amal qaytarib bo'lmaydi!</p>
+        </div>
+        
+        <div class="mb-4">
+            <h5>Buyurtma #{{ order.id }}</h5>
+            <p><strong>Mijoz:</strong> {{ order.customer.get_full_name }}</p>
+            <p><strong>Sana:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            <p><strong>Holati:</strong> 
+                {% if order.status == 'new' %}
+                <span class="badge bg-warning">Yangi</span>
+                {% elif order.status == 'paid' %}
+                <span class="badge bg-success">To'langan</span>
+                {% elif order.status == 'delivered' %}
+                <span class="badge bg-primary">Yetkazilgan</span>
+                {% else %}
+                <span class="badge bg-danger">Bekor qilingan</span>
+                {% endif %}
+            </p>
+            <p><strong>Mahsulotlar soni:</strong> {{ order.items.count }}</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Ha, o'chirish
+            </button>
+            <a href="{% url 'order-detail' order.id %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Yo'q, bekor qilish
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

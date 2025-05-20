@@ -1,0 +1,168 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Fashion CRM{% endblock %}
+
+{% block extra_css %}
+<style>
+    .formset-row {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 0.25rem;
+        background-color: #f8f9fa;
+    }
+    
+    .delete-row {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">{{ title }}</h1>
+    <a href="{% url 'order-list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Buyurtma ma'lumotlari</h6>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    {{ form.customer|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.status|as_crispy_field }}
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    {{ form.note|as_crispy_field }}
+                </div>
+            </div>
+            
+            <h5 class="mb-3">Buyurtma elementlari</h5>
+            
+            {{ formset.management_form }}
+            
+            <div id="formset-container">
+                {% for form in formset %}
+                <div class="formset-row">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.product|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.quantity|as_crispy_field }}
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-danger remove-form">
+                                    <i class="fas fa-trash"></i> O'chirish
+                                </button>
+                            </div>
+                            <div class="delete-row">
+                                {{ form.DELETE }}
+                            </div>
+                        </div>
+                    </div>
+                    {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="mb-4">
+                <button type="button" id="add-form" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Mahsulot qo'shish
+                </button>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Saqlash
+                </button>
+                <a href="{% url 'order-list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Bekor qilish
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formsetContainer = document.getElementById('formset-container');
+        const addFormButton = document.getElementById('add-form');
+        const totalForms = document.getElementById('id_items-TOTAL_FORMS');
+        
+        // Add new form
+        addFormButton.addEventListener('click', function() {
+            const formCount = formsetContainer.children.length;
+            const newForm = formsetContainer.children[0].cloneNode(true);
+            
+            // Update form index
+            newForm.innerHTML = newForm.innerHTML.replace(/-0-/g, `-${formCount}-`);
+            newForm.innerHTML = newForm.innerHTML.replace(/items-0/g, `items-${formCount}`);
+            
+            // Clear form values
+            const inputs = newForm.querySelectorAll('input:not([type=hidden]), select');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+            
+            // Add new form to container
+            formsetContainer.appendChild(newForm);
+            
+            // Update total forms
+            totalForms.value = formCount + 1;
+            
+            // Add event listener to remove button
+            addRemoveButtonListeners();
+        });
+        
+        // Function to handle remove button clicks
+        function addRemoveButtonListeners() {
+            const removeButtons = document.querySelectorAll('.remove-form');
+            
+            removeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const formRow = this.closest('.formset-row');
+                    const deleteCheckbox = formRow.querySelector('input[type=checkbox][name$=DELETE]');
+                    
+                    if (deleteCheckbox) {
+                        // If this is an existing form, mark it for deletion
+                        deleteCheckbox.checked = true;
+                        formRow.style.display = 'none';
+                    } else {
+                        // If this is a new form, remove it from the DOM
+                        formRow.remove();
+                        
+                        // Update total forms
+                        totalForms.value = parseInt(totalForms.value) - 1;
+                    }
+                });
+            });
+        }
+        
+        // Initialize remove button listeners
+        addRemoveButtonListeners();
+    });
+</script>
+{% endblock %}

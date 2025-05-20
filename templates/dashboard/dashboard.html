@@ -1,0 +1,367 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Fashion CRM{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" data-aos="fade-up">
+    <h1>Dashboard</h1>
+    <p>Kiyim-kechak sotuvi bo'yicha statistika va ma'lumotlar</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="row" data-aos="fade-up" data-aos-delay="100">
+    <div class="col-md-3 mb-4">
+        <div class="stats-card primary">
+            <div class="icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="title">Mahsulotlar</div>
+            <div class="value">{{ total_products }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="stats-card success">
+            <div class="icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="title">Mijozlar</div>
+            <div class="value">{{ total_customers }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="stats-card info">
+            <div class="icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="title">Buyurtmalar</div>
+            <div class="value">{{ total_orders }}</div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="stats-card warning">
+            <div class="icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="title">Yangi buyurtmalar</div>
+            <div class="value">{{ order_status.0.count|default:"0" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row" data-aos="fade-up" data-aos-delay="200">
+    <!-- Daily Revenue Chart -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0">Kunlik daromad (so'nggi 30 kun)</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Pie Chart -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="m-0">Buyurtmalar holati</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="orderStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row -->
+<div class="row" data-aos="fade-up" data-aos-delay="300">
+    <!-- Top Products -->
+    <div class="col-lg-6 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h6>Eng ko'p sotilgan mahsulotlar</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mahsulot nomi</th>
+                            <th>Sotilgan soni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in top_products %}
+                        <tr>
+                            <td>{{ product.product__name }}</td>
+                            <td>{{ product.total_sold }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center">Hozircha ma'lumot yo'q</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest Orders -->
+    <div class="col-lg-6 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h6>So'nggi buyurtmalar</h6>
+                <a href="{% url 'order-list' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-list me-1"></i> Barchasini ko'rish
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mijoz</th>
+                            <th>Holati</th>
+                            <th>Sana</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in latest_orders %}
+                        <tr>
+                            <td><a href="{% url 'order-detail' order.id %}">#{{ order.id }}</a></td>
+                            <td>{{ order.customer.get_full_name }}</td>
+                            <td>
+                                {% if order.status == 'new' %}
+                                <span class="badge bg-warning">Yangi</span>
+                                {% elif order.status == 'paid' %}
+                                <span class="badge bg-success">To'langan</span>
+                                {% elif order.status == 'delivered' %}
+                                <span class="badge bg-info">Yetkazilgan</span>
+                                {% else %}
+                                <span class="badge bg-danger">Bekor qilingan</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Hozircha buyurtmalar yo'q</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Products -->
+<div class="row" data-aos="fade-up" data-aos-delay="400">
+    <div class="col-12 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h6>Kam qolgan mahsulotlar</h6>
+                <a href="{% url 'product-list' %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-list me-1"></i> Barchasini ko'rish
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Mahsulot nomi</th>
+                            <th>Kategoriya</th>
+                            <th>Narxi</th>
+                            <th>Qolgan soni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in low_stock_products %}
+                        <tr>
+                            <td><a href="{% url 'product-detail' product.id %}">{{ product.name }}</a></td>
+                            <td>{{ product.category.name }}</td>
+                            <td>{{ product.price }} so'm</td>
+                            <td>
+                                {% if product.stock < 5 %}
+                                <span class="badge bg-danger">{{ product.stock }}</span>
+                                {% else %}
+                                <span class="badge bg-warning">{{ product.stock }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Kam qolgan mahsulotlar yo'q</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Revenue Chart
+    var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+
+    // Create gradient
+    var gradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(255, 107, 107, 0.5)');
+    gradient.addColorStop(1, 'rgba(255, 107, 107, 0.0)');
+
+    var revenueData = {
+        labels: [
+            {% for item in daily_revenue %}
+                "{{ item.date|date:'d.m' }}",
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Kunlik daromad',
+            data: [
+                {% for item in daily_revenue %}
+                    {{ item.revenue|default:0 }},
+                {% endfor %}
+            ],
+            backgroundColor: gradient,
+            borderColor: '#ff6b6b',
+            pointBackgroundColor: '#ff6b6b',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#ff6b6b',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+        }]
+    };
+
+    var revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: revenueData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' so\'m';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    padding: 15,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    cornerRadius: 10,
+                    displayColors: false
+                }
+            }
+        }
+    });
+
+    // Order Status Chart
+    var statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+    var statusData = {
+        labels: ['Yangi', 'To\'langan', 'Yetkazilgan', 'Bekor qilingan'],
+        datasets: [{
+            data: [
+                {% for status in order_status %}
+                    {% if status.status == 'new' %}
+                        {{ status.count }},
+                    {% endif %}
+                {% endfor %}
+                {% for status in order_status %}
+                    {% if status.status == 'paid' %}
+                        {{ status.count }},
+                    {% endif %}
+                {% endfor %}
+                {% for status in order_status %}
+                    {% if status.status == 'delivered' %}
+                        {{ status.count }},
+                    {% endif %}
+                {% endfor %}
+                {% for status in order_status %}
+                    {% if status.status == 'cancelled' %}
+                        {{ status.count }},
+                    {% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#feca57',
+                '#1dd1a1',
+                '#54a0ff',
+                '#ff6b6b'
+            ],
+            borderColor: 'white',
+            borderWidth: 2
+        }]
+    };
+
+    var statusChart = new Chart(statusCtx, {
+        type: 'doughnut',
+        data: statusData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    padding: 15,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    cornerRadius: 10,
+                    displayColors: false
+                }
+            },
+            cutout: '70%'
+        }
+    });
+</script>
+{% endblock %}

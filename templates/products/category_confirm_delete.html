@@ -1,0 +1,42 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+
+{% block title %}Kategoriyani o'chirish - Fashion CRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3">Kategoriyani o'chirish</h1>
+    <a href="{% url 'category-list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Orqaga
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tasdiqlash</h6>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-danger">
+            <p>Siz haqiqatan ham <strong>{{ category.name }}</strong> kategoriyasini o'chirmoqchimisiz?</p>
+            <p>Bu kategoriyaga tegishli barcha mahsulotlar ham o'chiriladi!</p>
+            <p>Bu amal qaytarib bo'lmaydi!</p>
+        </div>
+        
+        <div class="mb-4">
+            <h5>{{ category.name }}</h5>
+            <p><strong>Tavsif:</strong> {{ category.description|default:"Tavsif mavjud emas" }}</p>
+            <p><strong>Mahsulotlar soni:</strong> {{ category.products.count }}</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Ha, o'chirish
+            </button>
+            <a href="{% url 'category-list' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Yo'q, bekor qilish
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

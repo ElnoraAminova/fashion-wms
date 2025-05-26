@@ -2,7 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.urls import reverse
+# from products.models import Product, Category
 
+class Report(models.Model):
+    title = models.CharField(max_length=200)
+    summary = models.TextField()
 
 class Category(models.Model):
     """Mahsulot kategoriyalari"""

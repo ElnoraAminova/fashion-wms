@@ -13,6 +13,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // 🌗 Dark Mode toggle
+    const themeToggle = document.getElementById("toggle-theme");
+    const body = document.body;
+
+    if (localStorage.getItem("theme") === "dark") {
+        body.classList.add("dark-theme");
+    }
+
+    if (themeToggle) {
+        themeToggle.addEventListener("click", function () {
+            body.classList.toggle("dark-theme");
+            if (body.classList.contains("dark-theme")) {
+                localStorage.setItem("theme", "dark");
+            } else {
+                localStorage.setItem("theme", "light");
+            }
+        });
+    }
+
+
     // Auto-hide alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert');
     alerts.forEach(function(alert) {

@@ -5,6 +5,10 @@ from django.db.models import Sum, Count, F, DecimalField
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView 
+from django.urls import reverse_lazy
+
 
 from .models import Category, Product, Customer, Order, OrderItem
 from .forms import (
@@ -80,20 +84,16 @@ def product_detail(request, pk):
     return render(request, 'products/product_detail.html', {'product': product})
 
 
-@login_required
-def product_create(request):
-    """Yangi mahsulot qo'shish"""
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Mahsulot muvaffaqiyatli qo\'shildi!')
-            return redirect('product-list')
-    else:
-        form = ProductForm()
+class ProductCreateView(LoginRequiredMixin, CreateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'products/product_form.html'
+    success_url = reverse_lazy('product-list')
 
-    return render(request, 'products/product_form.html', {'form': form, 'title': 'Yangi mahsulot qo\'shish'})
-
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, 'Mahsulot muvaffaqiyatli qo\'shildi!')
+        return response
 
 @login_required
 def product_update(request, pk):
@@ -302,6 +302,11 @@ def order_delete(request, pk):
         return redirect('order-list')
 
     return render(request, 'orders/order_confirm_delete.html', {'order': order})
+
+
+def warehouse_list(request):
+    items = WarehouseItem.objects.select_related('product', 'product__category').all()
+    return render(request, 'warehouse/list.html', {'items': items})
 
 
 # Category views

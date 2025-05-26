@@ -1,5 +1,7 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+{% load i18n %}
+<p>{% trans "Welcome" %}</p>
 
 {% block title %}{{ customer.get_full_name }} - Fashion CRM{% endblock %}
 

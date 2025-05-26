@@ -1,0 +1,14 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Yangi Ombor Mahsuloti{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Omborxonaga mahsulot qo‘shish</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Saqlash</button>
+        <a href="{% url 'warehouse-list' %}" class="btn btn-secondary">Bekor qilish</a>
+    </form>
+</div>
+{% endblock %}

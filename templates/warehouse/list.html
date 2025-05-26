@@ -1,0 +1,45 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Omborxona - Clothes{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" data-aos="fade-up">
+    <h1>Omborxona</h1>
+    <p>Omborda mavjud mahsulotlar ro‘yxati</p>
+</div>
+<a href="{% url 'warehouse-create' %}" class="btn btn-success btn-sm">
+    <i class="fas fa-plus"></i> Yangi mahsulot qo‘shish
+</a>
+
+
+<div class="table-container mt-4" data-aos="fade-up" data-aos-delay="100">
+    <div class="table-header">
+        <h6>Ombor ro‘yxati</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Mahsulot nomi</th>
+                    <th>Kategoriya</th>
+                    <th>Zaxira soni</th>
+                    <th>Joylashuvi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.product.category.name }}</td>
+                    <td>{{ item.stock }}</td>
+                    <td>{{ item.location }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Ombor bo‘sh</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

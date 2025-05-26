@@ -1,5 +1,12 @@
 from django.urls import path
 from . import views
+from .views import ProductCreateView
+
+
+
+
+
+
 
 urlpatterns = [
     # Dashboard
@@ -7,7 +14,7 @@ urlpatterns = [
 
     # Products
     path('products/', views.product_list, name='product-list'),
-    path('products/new/', views.product_create, name='product-create'),
+    path('products/new/', ProductCreateView.as_view(), name='product-create'),
     path('products/<int:pk>/', views.product_detail, name='product-detail'),
     path('products/<int:pk>/update/', views.product_update, name='product-update'),
     path('products/<int:pk>/delete/', views.product_delete, name='product-delete'),
@@ -31,4 +38,7 @@ urlpatterns = [
     path('orders/<int:pk>/', views.order_detail, name='order-detail'),
     path('orders/<int:pk>/update/', views.order_update, name='order-update'),
     path('orders/<int:pk>/delete/', views.order_delete, name='order-delete'),
+
+    #WarehouseItem
+    path('', views.warehouse_list, name='warehouse-list'),
 ]

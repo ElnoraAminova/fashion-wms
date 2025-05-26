@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import UserRegisterForm, UserUpdateForm, ProfileUpdateForm
+from django.shortcuts import redirect
 
 
 class CustomLoginView(LoginView):
@@ -56,3 +57,5 @@ def profile(request):
     }
 
     return render(request, 'accounts/profile.html', context)
+
+
